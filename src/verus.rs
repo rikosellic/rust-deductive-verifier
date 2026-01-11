@@ -1084,6 +1084,11 @@ pub fn exec_verify(
         .map(|target| (target.name.clone(), target.clone()))
         .collect::<IndexMap<_, _>>();
     let out_dir = get_target_dir();
+    if !out_dir.exists() {
+        std::fs::create_dir_all(&out_dir).unwrap_or_else(|e| {
+            error!("Error creating target directory: {}", e);
+        });
+    }
     let deps_dir = out_dir.join(get_build_dir(options.release)).join("deps");
 
     let extended_targets = get_dependent_targets_batch(targets, options.release);
@@ -1290,6 +1295,13 @@ pub fn exec_compile(
     imports: &[VerusTarget],
     options: &ExtraOptions,
 ) -> Result<(), DynError> {
+    let out_dir = get_target_dir();
+    if !out_dir.exists() {
+        std::fs::create_dir_all(&out_dir).unwrap_or_else(|e| {
+            error!("Error creating target directory: {}", e);
+        });
+    }
+
     let extended_targets = get_dependent_targets_batch(targets, options.release);
     let mut compiled = std::collections::HashSet::new();
     let all_targets = verus_targets();
